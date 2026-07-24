@@ -133,7 +133,7 @@ function montarLinhaTabelaProduto(produto) {
         '<td class="tabela__acoes">' +
         '<button type="button" class="btn btn--icone btn--fantasma" data-acao="editar-produto" data-id="' + produto.id + '" aria-label="Editar produto">' +
         '<i data-lucide="pencil" aria-hidden="true"></i></button>' +
-        '<button type="button" class="btn btn--icone btn--fantasma" data-acao="excluir-produto" data-id="' + produto.id + '" aria-label="Excluir produto">' +
+        '<button type="button" class="btn btn--icone btn--fantasma" data-acao="excluir-produto" data-id="' + produto.id + '" aria-label="Remover produto">' +
         '<i data-lucide="trash-2" aria-hidden="true"></i></button>' +
         '</td></tr>';
 }
@@ -348,13 +348,16 @@ async function tratarEnvioFormularioProduto(evento) {
     }
 }
 
+// Soft delete (regra do enunciado): o produto NÃO é apagado, só some da listagem
+// padrão — a quantidade em estoque dele é zerada, e o status vira "Indisponível".
+// Ele volta a aparecer assim que o usuário escolher o filtro de status "Indisponível".
 async function confirmarExclusaoProduto(id) {
     const resultado = await Swal.fire({
         icon: 'warning',
-        title: 'Excluir produto?',
-        text: 'Esta ação não pode ser desfeita.',
+        title: 'Remover produto?',
+        text: 'O produto não é apagado: a quantidade em estoque é zerada e ele passa a aparecer só no filtro de status "Indisponível".',
         showCancelButton: true,
-        confirmButtonText: 'Sim, excluir',
+        confirmButtonText: 'Sim, remover',
         cancelButtonText: 'Cancelar',
         customClass: { popup: 'popup-silo' }
     });
@@ -364,11 +367,23 @@ async function confirmarExclusaoProduto(id) {
     }
 
     try {
-        await excluirProduto(id);
+        const listaEstoqueAtual = await buscarEstoque();
+        let registroEstoque = null;
+        for (const registro of listaEstoqueAtual) {
+            if (registro.produtoId === id) {
+                registroEstoque = registro;
+            }
+        }
+
+        if (registroEstoque) {
+            await atualizarEstoque(registroEstoque.id, { quantidade: 0, atualizadoEm: new Date().toISOString() });
+        }
+
+        await atualizarProduto(id, { status: 'Indisponível' });
 
         Swal.fire({
             icon: 'success',
-            title: 'Produto excluído!',
+            title: 'Produto removido!',
             toast: true,
             position: 'top-end',
             timer: 2500,
@@ -380,7 +395,7 @@ async function confirmarExclusaoProduto(id) {
     } catch (erro) {
         Swal.fire({
             icon: 'error',
-            title: 'Não foi possível excluir o produto',
+            title: 'Não foi possível remover o produto',
             customClass: { popup: 'popup-silo' }
         });
     }
