@@ -1,0 +1,151 @@
+/* ==========================================================================
+   PEDIDOS.CSS — Estilos exclusivos da página de Pedidos
+   (painel de filtros + listagem + lista dinâmica de itens no formulário)
+   ========================================================================== */
+
+.painel-filtros {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.painel-filtros .campo {
+  margin-bottom: 0;
+}
+
+#botaoLimparFiltrosPedido {
+  height: 42px;
+}
+
+/* --------------------------------------------------------------------------
+   CÉLULA "ITENS" NA TABELA — resumo com contagem
+   -------------------------------------------------------------------------- */
+.resumo-itens-pedido {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--cor-texto-secundario);
+}
+
+.resumo-itens-pedido svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* --------------------------------------------------------------------------
+   LISTA DINÂMICA DE ITENS (dentro do modal de pedido)
+   -------------------------------------------------------------------------- */
+.lista-itens-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.linha-item-pedido {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  background-color: var(--cor-superficie-alt);
+  border-radius: var(--raio-sm);
+  border: 1px solid var(--cor-borda);
+}
+
+.linha-item-pedido__campo {
+  min-width: 0;
+}
+
+.linha-item-pedido__campo--preco .form-control,
+.item-subtotal {
+  text-align: right;
+}
+
+.item-subtotal {
+  display: block;
+  font-weight: 600;
+  padding: 10px 4px;
+  font-size: 0.88rem;
+}
+
+.botao-remover-item {
+  color: var(--cor-texto-terciario);
+}
+
+.botao-remover-item:hover {
+  color: var(--cor-perigo);
+  background-color: var(--cor-perigo-suave);
+}
+
+.botao-adicionar-item {
+  align-self: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   RESUMO DO TOTAL (dentro do modal)
+   -------------------------------------------------------------------------- */
+.resumo-pedido {
+  margin: 18px 0;
+  padding: 14px 18px;
+  background-color: var(--cor-primaria-suave);
+  border-radius: var(--raio-sm);
+}
+
+.resumo-pedido__linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  color: var(--cor-primaria-forte);
+}
+
+.resumo-pedido__linha strong {
+  font-size: 1.25rem;
+  font-family: var(--fonte-display);
+}
+
+.resumo-pedido .campo__ajuda {
+  display: block;
+  margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVIDADE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .painel-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .linha-item-pedido {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "produto produto"
+      "quantidade preco"
+      "subtotal remover";
+  }
+
+  .linha-item-pedido__campo--produto { grid-area: produto; }
+  .linha-item-pedido__campo--quantidade { grid-area: quantidade; }
+  .linha-item-pedido__campo--preco { grid-area: preco; }
+  .linha-item-pedido__campo--subtotal {
+    grid-area: subtotal;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .botao-remover-item { grid-area: remover; justify-self: end; }
+}
+
+@media (max-width: 560px) {
+  .painel-filtros {
+    grid-template-columns: 1fr;
+  }
+}

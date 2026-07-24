@@ -1,0 +1,93 @@
+{
+  "produtos": [
+    {
+      "id": "k3f7a9",
+      "nome": "Teclado Mecânico RGB",
+      "categoria": "Periféricos",
+      "preco": 259.90,
+      "status": "Disponível"
+    },
+    {
+      "id": "p2x8m1",
+      "nome": "Mouse Sem Fio",
+      "categoria": "Periféricos",
+      "preco": 89.90,
+      "status": "Estoque baixo"
+    },
+    {
+      "id": "q9v4t6",
+      "nome": "Monitor 24' Full HD",
+      "categoria": "Monitores",
+      "preco": 749.00,
+      "status": "Indisponível"
+    },
+    {
+      "id": "z5n2w8",
+      "nome": "Headset Gamer",
+      "categoria": "Áudio",
+      "preco": 199.90,
+      "status": "Disponível"
+    }
+  ],
+
+  "estoque": [
+    {
+      "id": "e1r6y3",
+      "produtoId": "k3f7a9",
+      "quantidade": 35,
+      "atualizadoEm": "2026-07-20T10:15:00Z"
+    },
+    {
+      "id": "e2h9j0",
+      "produtoId": "p2x8m1",
+      "quantidade": 4,
+      "atualizadoEm": "2026-07-21T09:30:00Z"
+    },
+    {
+      "id": "e3b5l7",
+      "produtoId": "q9v4t6",
+      "quantidade": 0,
+      "atualizadoEm": "2026-07-22T14:45:00Z"
+    },
+    {
+      "id": "e4d8s2",
+      "produtoId": "z5n2w8",
+      "quantidade": 22,
+      "atualizadoEm": "2026-07-19T08:00:00Z"
+    }
+  ],
+
+  "pedidos": [
+    {
+      "id": "o1c4g9",
+      "cliente": "João Silva",
+      "data": "2026-07-22T16:20:00Z",
+      "itens": [
+        { "produtoId": "k3f7a9", "quantidade": 2, "precoUnitario": 259.90 },
+        { "produtoId": "z5n2w8", "quantidade": 1, "precoUnitario": 199.90 }
+      ],
+      "total": 719.70,
+      "status": "Concluído"
+    },
+    {
+      "id": "o2u7i5",
+      "cliente": "Maria Souza",
+      "data": "2026-07-23T09:05:00Z",
+      "itens": [
+        { "produtoId": "p2x8m1", "quantidade": 6, "precoUnitario": 89.90 }
+      ],
+      "total": 539.40,
+      "status": "Pendente"
+    },
+    {
+      "id": "o3k0p4",
+      "cliente": "Carlos Pereira",
+      "data": "2026-07-23T11:40:00Z",
+      "itens": [
+        { "produtoId": "q9v4t6", "quantidade": 3, "precoUnitario": 749.00 }
+      ],
+      "total": 2247.00,
+      "status": "Cancelado - sem estoque"
+    }
+  ]
+}

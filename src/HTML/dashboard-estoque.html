@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F4F6F3" />
+  <script>
+    // Aplica o tema salvo ANTES da página pintar na tela, pra não dar aquele clarão
+    // branco de meio segundo ao trocar de página com o tema escuro ativado.
+    (function () {
+      var temaSalvo = localStorage.getItem('temaSilo');
+      if (temaSalvo === 'escuro') {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      } else if (!temaSalvo && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      }
+    })();
+  </script>
+  <title>Dashboard &amp; Estoque · Silo</title>
+  <meta name="description" content="Visão consolidada de produtos, estoque e pedidos, com gestão de estoque em tempo real." />
+
+  <!-- Fontes: Fraunces (display), Inter (corpo), JetBrains Mono (dados) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap (base estrutural — visual sobrescrito em layout.css/dashboard-estoque.css) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- SweetAlert2 — feedback visual de sucesso/erro/confirmação -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+
+  <!-- CSS do sistema -->
+  <link href="../CSS/layout.css" rel="stylesheet" />
+  <link href="../CSS/dashboard-estoque.css" rel="stylesheet" />
+</head>
+<body>
+  <a href="#conteudo-principal" class="link-pular-conteudo">Pular para o conteúdo</a>
+
+  <div class="app">
+    <!-- ====================== SIDEBAR ====================== -->
+    <div class="sobreposicao-sidebar" id="sobreposicaoSidebar" data-acao="fechar-sidebar"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <button type="button" class="btn btn--icone btn--fantasma sidebar__botao-fechar" id="botaoFecharSidebar" aria-label="Fechar menu de navegação">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+
+      <a href="dashboard-estoque.html" class="sidebar__marca">
+        <span class="sidebar__marca-icone"><i data-lucide="warehouse" aria-hidden="true"></i></span>
+        <span class="sidebar__marca-texto">
+          <span class="sidebar__marca-nome">Silo</span>
+          <span class="sidebar__marca-tagline">Operações</span>
+        </span>
+      </a>
+
+      <nav class="sidebar__nav" aria-label="Navegação principal">
+        <a href="dashboard-estoque.html" class="sidebar__link" aria-current="page">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+          <span>Dashboard &amp; Estoque</span>
+        </a>
+        <a href="produtos.html" class="sidebar__link">
+          <i data-lucide="package" aria-hidden="true"></i>
+          <span>Produtos</span>
+        </a>
+        <a href="pedidos.html" class="sidebar__link">
+          <i data-lucide="shopping-cart" aria-hidden="true"></i>
+          <span>Pedidos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__rodape">
+        <button type="button" class="alterna-tema" id="botaoAlternarTema" aria-pressed="false">
+          <span class="alterna-tema__rotulo">
+            <i data-lucide="sun-moon" aria-hidden="true"></i>
+            Tema escuro
+          </span>
+          <span class="alterna-tema__trilho" id="trilhoAlternarTema" data-ativo="false">
+            <span class="alterna-tema__bolinha"></span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ====================== CONTEÚDO ====================== -->
+    <main class="conteudo-principal" id="conteudo-principal">
+      <div class="topbar-mobile">
+        <button type="button" class="btn btn--icone btn--secundario botao-menu-mobile" id="botaoAbrirSidebar" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+        <span class="topbar-mobile__marca"><i data-lucide="warehouse" aria-hidden="true"></i>Silo</span>
+      </div>
+
+      <header class="cabecalho-pagina">
+        <div>
+          <h1 class="cabecalho-pagina__titulo">Dashboard</h1>
+          <p class="cabecalho-pagina__subtitulo">Visão consolidada de produtos, estoque e pedidos</p>
+        </div>
+        <div class="cabecalho-pagina__acoes">
+          <span class="indicador-tempo-real" id="indicadorTempoReal">
+            <span class="indicador-tempo-real__ponto" aria-hidden="true"></span>
+            <span id="textoIndicadorTempoReal">Atualizado agora</span>
+          </span>
+          <button type="button" class="btn btn--secundario" id="botaoExportarCsv">
+            <i data-lucide="download" aria-hidden="true"></i>
+            Exportar CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- ====================== BLOCO: INDICADORES (KPIs) ====================== -->
+      <section aria-labelledby="tituloIndicadores">
+        <h2 id="tituloIndicadores" class="somente-leitor-tela">Indicadores consolidados</h2>
+
+        <div class="grade-kpis" id="grade-kpis" aria-live="polite">
+          <article class="cartao kpi-card">
+            <div class="kpi-card__icone kpi-card__icone--primaria"><i data-lucide="package" aria-hidden="true"></i></div>
+            <div>
+              <p class="kpi-card__rotulo">Total de produtos</p>
+              <p class="kpi-card__valor dado-numerico" id="kpiTotalProdutos">—</p>
+            </div>
+          </article>
+
+          <article class="cartao kpi-card">
+            <div class="kpi-card__icone kpi-card__icone--aviso"><i data-lucide="triangle-alert" aria-hidden="true"></i></div>
+            <div>
+              <p class="kpi-card__rotulo">Estoque baixo</p>
+              <p class="kpi-card__valor dado-numerico" id="kpiEstoqueBaixo">—</p>
+            </div>
+          </article>
+
+          <article class="cartao kpi-card">
+            <div class="kpi-card__icone kpi-card__icone--info"><i data-lucide="shopping-cart" aria-hidden="true"></i></div>
+            <div>
+              <p class="kpi-card__rotulo">Pedidos no mês</p>
+              <p class="kpi-card__valor dado-numerico" id="kpiPedidosMes">—</p>
+            </div>
+          </article>
+
+          <article class="cartao kpi-card">
+            <div class="kpi-card__icone kpi-card__icone--accent"><i data-lucide="wallet" aria-hidden="true"></i></div>
+            <div>
+              <p class="kpi-card__rotulo">Faturamento estimado</p>
+              <p class="kpi-card__valor dado-numerico" id="kpiFaturamento">—</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ====================== BLOCO: GRÁFICOS ====================== -->
+      <section aria-labelledby="tituloGraficos" class="secao-graficos">
+        <h2 id="tituloGraficos" class="somente-leitor-tela">Gráficos do dashboard</h2>
+
+        <div class="grade-graficos">
+          <article class="cartao">
+            <div class="cartao__cabecalho">
+              <h3 class="cartao__titulo">Status dos produtos</h3>
+              <i data-lucide="pie-chart" aria-hidden="true" class="icone-cartao-titulo"></i>
+            </div>
+            <div class="cartao__corpo">
+              <div id="graficoStatusProdutos" role="img" aria-label="Gráfico de pizza com a distribuição de produtos por status"></div>
+              <p class="info-banner-grafico" id="infoBannerStatus">Passe o mouse sobre uma fatia para ver os detalhes.</p>
+            </div>
+          </article>
+
+          <article class="cartao">
+            <div class="cartao__cabecalho">
+              <h3 class="cartao__titulo">Unidades vendidas por produto</h3>
+              <i data-lucide="bar-chart-3" aria-hidden="true" class="icone-cartao-titulo"></i>
+            </div>
+            <div class="cartao__corpo">
+              <div id="graficoUnidadesVendidas" role="img" aria-label="Gráfico de barras com as unidades vendidas por produto"></div>
+              <p class="info-banner-grafico" id="infoBannerVendas">Passe o mouse sobre uma barra para ver os detalhes.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ====================== BLOCO: ESTOQUE (CRUD) ====================== -->
+      <section aria-labelledby="tituloEstoque" class="secao-estoque">
+        <header class="cabecalho-secao">
+          <div>
+            <h2 id="tituloEstoque" class="cabecalho-secao__titulo">Estoque</h2>
+            <p class="cabecalho-secao__subtitulo">Movimentações e quantidade disponível por produto</p>
+          </div>
+          <button type="button" class="btn btn--primario" id="botaoNovoItemEstoque" data-bs-toggle="modal" data-bs-target="#modalEstoque">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            Registrar movimento
+          </button>
+        </header>
+
+        <div class="info-banner">
+          <i data-lucide="info" aria-hidden="true"></i>
+          <p>
+            <strong>Disponível</strong> = mais de 10 unidades &nbsp;·&nbsp;
+            <strong>Estoque baixo</strong> = entre 1 e 10 unidades &nbsp;·&nbsp;
+            <strong>Indisponível</strong> = 0 unidades. O status do produto é recalculado automaticamente sempre que a quantidade muda.
+          </p>
+        </div>
+
+        <div class="barra-ferramentas">
+          <div class="campo campo--inline">
+            <label class="campo__rotulo" for="filtroStatusEstoque">Filtrar por status</label>
+            <select class="form-select" id="filtroStatusEstoque" name="filtroStatusEstoque">
+              <option value="todos">Todos os status</option>
+              <option value="disponivel">Disponível</option>
+              <option value="baixo">Estoque baixo</option>
+              <option value="indisponivel">Indisponível</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabela-wrapper">
+          <table class="tabela" id="tabelaEstoque">
+            <caption class="somente-leitor-tela">Lista de itens em estoque por produto</caption>
+            <thead>
+              <tr>
+                <th scope="col">Produto</th>
+                <th scope="col">Quantidade</th>
+                <th scope="col">Status</th>
+                <th scope="col">Atualizado em</th>
+                <th scope="col"><span class="somente-leitor-tela">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaEstoque">
+              <!-- Linhas inseridas dinamicamente pelo JS (JS/dashboard-estoque.js) -->
+            </tbody>
+          </table>
+
+          <div class="skeleton-tabela" id="skeletonEstoque">
+            <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+            <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+            <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+            <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          </div>
+
+          <div class="estado-vazio" id="estadoVazioEstoque" hidden>
+            <i data-lucide="package-open" aria-hidden="true"></i>
+            <p class="estado-vazio__titulo">Nenhum item encontrado</p>
+            <p class="estado-vazio__descricao">Ajuste o filtro de status ou registre um novo movimento de estoque.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====================== MODAL: MOVIMENTO DE ESTOQUE ====================== -->
+  <div class="modal fade" id="modalEstoque" tabindex="-1" aria-labelledby="modalEstoqueTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formEstoque" novalidate>
+          <div class="modal-header">
+            <h3 class="modal-title" id="modalEstoqueTitulo">Registrar movimento de estoque</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="estoqueId" name="estoqueId" />
+
+            <div class="campo">
+              <label class="campo__rotulo" for="estoqueProdutoId">Produto <span class="obrigatorio">*</span></label>
+              <select class="form-select" id="estoqueProdutoId" name="estoqueProdutoId" required>
+                <option value="" selected disabled>Selecione um produto…</option>
+                <!-- Opções preenchidas dinamicamente pelo JS a partir do endpoint de Produtos -->
+              </select>
+              <span class="campo__erro" id="erroEstoqueProdutoId" hidden></span>
+            </div>
+
+            <div class="campo">
+              <span class="campo__rotulo">Tipo de movimento <span class="obrigatorio">*</span></span>
+              <div class="grupo-radio" role="radiogroup" aria-label="Tipo de movimento">
+                <label class="opcao-radio">
+                  <input type="radio" name="tipoMovimento" value="entrada" checked />
+                  <i data-lucide="arrow-up-circle" aria-hidden="true"></i>
+                  Entrada
+                </label>
+                <label class="opcao-radio">
+                  <input type="radio" name="tipoMovimento" value="saida" />
+                  <i data-lucide="arrow-down-circle" aria-hidden="true"></i>
+                  Saída
+                </label>
+              </div>
+            </div>
+
+            <div class="campo">
+              <label class="campo__rotulo" for="estoqueQuantidadeMovimento">Quantidade a movimentar <span class="obrigatorio">*</span></label>
+              <input type="number" class="form-control" id="estoqueQuantidadeMovimento" name="estoqueQuantidadeMovimento" min="1" step="1" inputmode="numeric" placeholder="Ex.: 10…" required />
+              <span class="campo__ajuda">Quantidade atual: <strong class="dado-numerico" id="estoqueQuantidadeAtual">0</strong> unidades</span>
+              <span class="campo__erro" id="erroEstoqueQuantidade" hidden></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secundario" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn--primario" id="botaoSalvarEstoque">
+              <i data-lucide="check" aria-hidden="true"></i>
+              Salvar movimento
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== SCRIPTS ====================== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <script src="../JS/utils.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/navbar.js"></script>
+  <script src="../JS/dashboard-estoque.js"></script>
+</body>
+</html>

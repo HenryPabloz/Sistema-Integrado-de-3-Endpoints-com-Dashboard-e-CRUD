@@ -1,0 +1,228 @@
+/* ==========================================================================
+   DASHBOARD-ESTOQUE.CSS — Estilos exclusivos da página inicial
+   (bloco de indicadores + gráficos + CRUD de estoque)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   INDICADORES (KPIs)
+   -------------------------------------------------------------------------- */
+.grade-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.kpi-card__icone {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--raio-md);
+  flex-shrink: 0;
+}
+
+.kpi-card__icone svg {
+  width: 21px;
+  height: 21px;
+}
+
+.kpi-card__icone--primaria {
+  background-color: var(--cor-primaria-suave);
+  color: var(--cor-primaria);
+}
+
+.kpi-card__icone--aviso {
+  background-color: var(--cor-aviso-suave);
+  color: var(--cor-aviso);
+}
+
+.kpi-card__icone--info {
+  background-color: var(--cor-info-suave);
+  color: var(--cor-info);
+}
+
+.kpi-card__icone--accent {
+  background-color: var(--cor-accent-suave);
+  color: var(--cor-accent);
+}
+
+.kpi-card__rotulo {
+  font-size: 0.78rem;
+  color: var(--cor-texto-secundario);
+  margin-bottom: 4px;
+}
+
+.kpi-card__valor {
+  font-family: var(--fonte-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   GRÁFICOS
+   -------------------------------------------------------------------------- */
+.secao-graficos {
+  margin-bottom: 36px;
+}
+
+.grade-graficos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.icone-cartao-titulo {
+  width: 18px;
+  height: 18px;
+  color: var(--cor-texto-terciario);
+}
+
+.info-banner-grafico {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background-color: var(--cor-superficie-alt);
+  border-radius: var(--raio-sm);
+  font-size: 0.8rem;
+  color: var(--cor-texto-secundario);
+  text-align: center;
+  transition: color var(--transicao-rapida);
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-banner-grafico.ativo {
+  color: var(--cor-primaria);
+  font-weight: 600;
+  background-color: var(--cor-primaria-suave);
+}
+
+/* --------------------------------------------------------------------------
+   SEÇÃO ESTOQUE
+   -------------------------------------------------------------------------- */
+.secao-estoque {
+  margin-top: 8px;
+}
+
+.cabecalho-secao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.cabecalho-secao__titulo {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.cabecalho-secao__subtitulo {
+  font-size: 0.85rem;
+  color: var(--cor-texto-secundario);
+  margin-top: 4px;
+}
+
+.barra-ferramentas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.campo--inline {
+  margin-bottom: 0;
+  min-width: 220px;
+}
+
+.skeleton-tabela {
+  padding: 18px;
+}
+
+.skeleton-tabela[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   RADIO CUSTOMIZADO (tipo de movimento no modal)
+   -------------------------------------------------------------------------- */
+.grupo-radio {
+  display: flex;
+  gap: 10px;
+}
+
+.opcao-radio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  transition: border-color var(--transicao-rapida), background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.opcao-radio svg {
+  width: 16px;
+  height: 16px;
+}
+
+.opcao-radio:has(input:checked) {
+  border-color: var(--cor-primaria);
+  background-color: var(--cor-primaria-suave);
+  color: var(--cor-primaria-forte);
+}
+
+.opcao-radio:has(input:focus-visible) {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.opcao-radio input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVIDADE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .grade-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .grade-graficos {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .grade-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .grupo-radio {
+    flex-direction: column;
+  }
+}

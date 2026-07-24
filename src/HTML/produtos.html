@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F4F6F3" />
+  <script>
+    // Aplica o tema salvo ANTES da página pintar na tela, pra não dar aquele clarão
+    // branco de meio segundo ao trocar de página com o tema escuro ativado.
+    (function () {
+      var temaSalvo = localStorage.getItem('temaSilo');
+      if (temaSalvo === 'escuro') {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      } else if (!temaSalvo && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      }
+    })();
+  </script>
+  <title>Produtos · Silo</title>
+  <meta name="description" content="Cadastro, busca e filtros de produtos, com status calculado automaticamente a partir do estoque." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+
+  <link href="../CSS/layout.css" rel="stylesheet" />
+  <link href="../CSS/produtos.css" rel="stylesheet" />
+</head>
+<body>
+  <a href="#conteudo-principal" class="link-pular-conteudo">Pular para o conteúdo</a>
+
+  <div class="app">
+    <div class="sobreposicao-sidebar" id="sobreposicaoSidebar" data-acao="fechar-sidebar"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <button type="button" class="btn btn--icone btn--fantasma sidebar__botao-fechar" id="botaoFecharSidebar" aria-label="Fechar menu de navegação">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+
+      <a href="dashboard-estoque.html" class="sidebar__marca">
+        <span class="sidebar__marca-icone"><i data-lucide="warehouse" aria-hidden="true"></i></span>
+        <span class="sidebar__marca-texto">
+          <span class="sidebar__marca-nome">Silo</span>
+          <span class="sidebar__marca-tagline">Operações</span>
+        </span>
+      </a>
+
+      <nav class="sidebar__nav" aria-label="Navegação principal">
+        <a href="dashboard-estoque.html" class="sidebar__link">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+          <span>Dashboard &amp; Estoque</span>
+        </a>
+        <a href="produtos.html" class="sidebar__link" aria-current="page">
+          <i data-lucide="package" aria-hidden="true"></i>
+          <span>Produtos</span>
+        </a>
+        <a href="pedidos.html" class="sidebar__link">
+          <i data-lucide="shopping-cart" aria-hidden="true"></i>
+          <span>Pedidos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__rodape">
+        <button type="button" class="alterna-tema" id="botaoAlternarTema" aria-pressed="false">
+          <span class="alterna-tema__rotulo">
+            <i data-lucide="sun-moon" aria-hidden="true"></i>
+            Tema escuro
+          </span>
+          <span class="alterna-tema__trilho" id="trilhoAlternarTema" data-ativo="false">
+            <span class="alterna-tema__bolinha"></span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal" id="conteudo-principal">
+      <div class="topbar-mobile">
+        <button type="button" class="btn btn--icone btn--secundario botao-menu-mobile" id="botaoAbrirSidebar" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+        <span class="topbar-mobile__marca"><i data-lucide="warehouse" aria-hidden="true"></i>Silo</span>
+      </div>
+
+      <header class="cabecalho-pagina">
+        <div>
+          <h1 class="cabecalho-pagina__titulo">Produtos</h1>
+          <p class="cabecalho-pagina__subtitulo">Catálogo com status calculado automaticamente pelo estoque</p>
+        </div>
+        <div class="cabecalho-pagina__acoes">
+          <button type="button" class="btn btn--primario" id="botaoNovoProduto" data-bs-toggle="modal" data-bs-target="#modalProduto">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            Novo produto
+          </button>
+        </div>
+      </header>
+
+      <div class="info-banner">
+        <i data-lucide="info" aria-hidden="true"></i>
+        <p>
+          Produtos com status <strong>Indisponível</strong> ficam ocultos da listagem por padrão. Selecione o filtro de status <strong>Indisponível</strong> para exibi-los.
+        </p>
+      </div>
+
+      <!-- ====================== FILTROS ====================== -->
+      <div class="painel-filtros cartao">
+        <div class="campo campo--busca">
+          <label class="campo__rotulo" for="buscaNomeProduto">Buscar por nome</label>
+          <div class="campo-busca__wrapper">
+            <i data-lucide="search" aria-hidden="true"></i>
+            <input type="text" class="form-control" id="buscaNomeProduto" name="buscaNomeProduto" placeholder="Digite o nome do produto…" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="campo">
+          <label class="campo__rotulo" for="filtroCategoria">Categoria</label>
+          <select class="form-select" id="filtroCategoria" name="filtroCategoria">
+            <option value="todas">Todas as categorias</option>
+            <option value="Periféricos">Periféricos</option>
+            <option value="Monitores">Monitores</option>
+            <option value="Áudio">Áudio</option>
+            <option value="Notebooks">Notebooks</option>
+            <option value="Armazenamento">Armazenamento</option>
+            <option value="Redes">Redes</option>
+            <option value="Acessórios">Acessórios</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label class="campo__rotulo" for="filtroStatusProduto">Status</label>
+          <select class="form-select" id="filtroStatusProduto" name="filtroStatusProduto">
+            <option value="todos">Todos (exceto indisponível)</option>
+            <option value="Disponível">Disponível</option>
+            <option value="Estoque baixo">Estoque baixo</option>
+            <option value="Indisponível">Indisponível</option>
+          </select>
+        </div>
+
+        <div class="campo campo--preco">
+          <span class="campo__rotulo">Preço</span>
+          <div class="campo-preco__wrapper">
+            <select class="form-select" id="filtroPrecoOperador" name="filtroPrecoOperador" aria-label="Comparação de preço">
+              <option value="qualquer">Qualquer valor</option>
+              <option value="maior">Maior que</option>
+              <option value="menor">Menor que</option>
+            </select>
+            <input type="number" class="form-control" id="filtroPrecoValor" name="filtroPrecoValor" min="0" step="0.01" inputmode="decimal" placeholder="R$ 0,00…" disabled />
+          </div>
+        </div>
+
+        <button type="button" class="btn btn--fantasma" id="botaoLimparFiltrosProduto">
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          Limpar filtros
+        </button>
+      </div>
+
+      <!-- ====================== LISTAGEM ====================== -->
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabelaProdutos">
+          <caption class="somente-leitor-tela">Lista de produtos cadastrados</caption>
+          <thead>
+            <tr>
+              <th scope="col">Produto</th>
+              <th scope="col">Categoria</th>
+              <th scope="col">Preço</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="somente-leitor-tela">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabelaProdutos">
+            <!-- Linhas inseridas dinamicamente pelo JS (JS/produtos.js) -->
+          </tbody>
+        </table>
+
+        <div class="skeleton-tabela" id="skeletonProdutos">
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+        </div>
+
+        <div class="estado-vazio" id="estadoVazioProdutos" hidden>
+          <i data-lucide="search-x" aria-hidden="true"></i>
+          <p class="estado-vazio__titulo">Nenhum produto encontrado</p>
+          <p class="estado-vazio__descricao">Tente ajustar a busca ou os filtros aplicados.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ====================== MODAL: PRODUTO ====================== -->
+  <div class="modal fade" id="modalProduto" tabindex="-1" aria-labelledby="modalProdutoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formProduto" novalidate>
+          <div class="modal-header">
+            <h3 class="modal-title" id="modalProdutoTitulo">Novo produto</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="produtoId" name="produtoId" />
+
+            <div class="campo">
+              <label class="campo__rotulo" for="produtoNome">Nome do produto <span class="obrigatorio">*</span></label>
+              <input type="text" class="form-control" id="produtoNome" name="produtoNome" placeholder="Ex.: Teclado Mecânico RGB…" autocomplete="off" required />
+              <span class="campo__erro" id="erroProdutoNome" hidden></span>
+            </div>
+
+            <div class="campo-grupo">
+              <div class="campo">
+                <label class="campo__rotulo" for="produtoCategoria">Categoria <span class="obrigatorio">*</span></label>
+                <select class="form-select" id="produtoCategoria" name="produtoCategoria" required>
+                  <option value="" selected disabled>Selecione…</option>
+                  <option value="Periféricos">Periféricos</option>
+                  <option value="Monitores">Monitores</option>
+                  <option value="Áudio">Áudio</option>
+                  <option value="Notebooks">Notebooks</option>
+                  <option value="Armazenamento">Armazenamento</option>
+                  <option value="Redes">Redes</option>
+                  <option value="Acessórios">Acessórios</option>
+                </select>
+                <span class="campo__erro" id="erroProdutoCategoria" hidden></span>
+              </div>
+
+              <div class="campo">
+                <label class="campo__rotulo" for="produtoPreco">Preço (R$) <span class="obrigatorio">*</span></label>
+                <input type="number" class="form-control" id="produtoPreco" name="produtoPreco" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00…" required />
+                <span class="campo__erro" id="erroProdutoPreco" hidden></span>
+              </div>
+            </div>
+
+            <div class="campo" id="campoQuantidadeInicial">
+              <label class="campo__rotulo" for="produtoQuantidadeInicial">Quantidade em estoque <span class="obrigatorio">*</span></label>
+              <input type="number" class="form-control" id="produtoQuantidadeInicial" name="produtoQuantidadeInicial" min="0" step="1" inputmode="numeric" placeholder="Ex.: 20…" />
+              <span class="campo__ajuda">Quantidade inicial deste produto no estoque — o status já nasce calculado a partir dela.</span>
+              <span class="campo__erro" id="erroProdutoQuantidadeInicial" hidden></span>
+            </div>
+
+            <div class="campo">
+              <span class="campo__rotulo">Status</span>
+              <div class="campo-status-derivado" id="campoStatusDerivado">
+                <span class="badge-status badge-status--disponivel" id="previaStatusProduto">
+                  <span class="medidor-nivel medidor-nivel--nivel-3" aria-hidden="true">
+                    <span class="medidor-nivel__barra"></span><span class="medidor-nivel__barra"></span><span class="medidor-nivel__barra"></span>
+                  </span>
+                  <span class="badge-status__emoji">🟢</span>
+                  Disponível
+                </span>
+                <span class="campo__ajuda">Calculado automaticamente pela quantidade em estoque — não é editável aqui.</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secundario" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn--primario" id="botaoSalvarProduto">
+              <i data-lucide="check" aria-hidden="true"></i>
+              Salvar produto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="../JS/utils.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/navbar.js"></script>
+  <script src="../JS/produtos.js"></script>
+</body>
+</html>

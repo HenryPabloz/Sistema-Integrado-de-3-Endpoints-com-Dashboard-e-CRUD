@@ -1,0 +1,1136 @@
+/* ==========================================================================
+   LAYOUT.CSS — Fundação visual compartilhada do sistema "Silo"
+   Variáveis de tema, sidebar, tipografia e componentes reutilizados
+   por todas as páginas (dashboard-estoque, produtos, pedidos).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. RESET E BASE
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transicao-base), color var(--transicao-base);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--fonte-display);
+  color: var(--cor-texto);
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+/* Números e dados tabulares sempre alinhados */
+.dado-numerico,
+.valor-monetario,
+td.coluna-numero {
+  font-family: var(--fonte-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   2. TOKENS DE DESIGN — TEMA CLARO (padrão)
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* Superfícies */
+  --cor-fundo: #F4F6F3;
+  --cor-fundo-elevado: #FFFFFF;
+  --cor-superficie: #FFFFFF;
+  --cor-superficie-alt: #EBEFE9;
+  --cor-borda: #E0E5DE;
+  --cor-borda-forte: #C7CFC3;
+
+  /* Texto */
+  --cor-texto: #16211B;
+  --cor-texto-secundario: #5B6B61;
+  --cor-texto-terciario: #8B978E;
+
+  /* Marca */
+  --cor-primaria: #2F5D50;
+  --cor-primaria-forte: #21453A;
+  --cor-primaria-suave: #E3ECE7;
+  --cor-accent: #DD7A1F;
+  --cor-accent-suave: #FBEADA;
+
+  /* Semânticas */
+  --cor-sucesso: #1F9D6C;
+  --cor-sucesso-suave: #E1F5EC;
+  --cor-aviso: #DD7A1F;
+  --cor-aviso-suave: #FBEADA;
+  --cor-perigo: #C6423F;
+  --cor-perigo-suave: #FBE8E7;
+  --cor-info: #3B72C4;
+  --cor-info-suave: #E7EEFA;
+
+  /* Sombras suaves */
+  --sombra-sm: 0 1px 2px rgba(20, 30, 24, 0.06);
+  --sombra-md: 0 4px 14px -4px rgba(20, 30, 24, 0.12), 0 1px 2px rgba(20, 30, 24, 0.05);
+  --sombra-lg: 0 16px 40px -12px rgba(20, 30, 24, 0.22);
+
+  /* Raios */
+  --raio-sm: 8px;
+  --raio-md: 14px;
+  --raio-lg: 20px;
+  --raio-full: 999px;
+
+  /* Tipografia */
+  --fonte-display: "Fraunces", Georgia, serif;
+  --fonte-corpo: "Inter", system-ui, sans-serif;
+  --fonte-mono: "JetBrains Mono", "Courier New", monospace;
+
+  /* Estrutura */
+  --largura-sidebar: 264px;
+  --largura-sidebar-colapsada: 88px;
+
+  /* Movimento */
+  --transicao-rapida: 150ms ease;
+  --transicao-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   3. TOKENS DE DESIGN — TEMA ESCURO
+   -------------------------------------------------------------------------- */
+[data-tema="escuro"] {
+  color-scheme: dark;
+
+  --cor-fundo: #0C1210;
+  --cor-fundo-elevado: #141C18;
+  --cor-superficie: #141C18;
+  --cor-superficie-alt: #1B2521;
+  --cor-borda: #263029;
+  --cor-borda-forte: #34423A;
+
+  --cor-texto: #EAF0EC;
+  --cor-texto-secundario: #9CAEA2;
+  --cor-texto-terciario: #6C7C72;
+
+  --cor-primaria: #6BAF9B;
+  --cor-primaria-forte: #8AC4B2;
+  --cor-primaria-suave: #1B2E28;
+  --cor-accent: #F0973D;
+  --cor-accent-suave: #2E2114;
+
+  --cor-sucesso: #3BC189;
+  --cor-sucesso-suave: #16281F;
+  --cor-aviso: #F0973D;
+  --cor-aviso-suave: #2E2114;
+  --cor-perigo: #E67370;
+  --cor-perigo-suave: #2E1717;
+  --cor-info: #74A0E6;
+  --cor-info-suave: #16212E;
+
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sombra-md: 0 4px 18px -4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sombra-lg: 0 20px 48px -14px rgba(0, 0, 0, 0.6);
+}
+
+meta[name="theme-color"] {
+  content: var(--cor-fundo);
+}
+
+/* --------------------------------------------------------------------------
+   4. ESTRUTURA GERAL DA APLICAÇÃO
+   -------------------------------------------------------------------------- */
+.app {
+  display: grid;
+  grid-template-columns: var(--largura-sidebar) 1fr;
+  min-height: 100vh;
+}
+
+/* Escondido por padrão em qualquer largura de tela: sem isso, esse <div> vira um
+   3º item dentro do grid de 2 colunas do .app e empurra a sidebar de verdade
+   para a coluna de conteúdo. Ele só aparece (via .ativa) no modo mobile. */
+.sobreposicao-sidebar {
+  display: none;
+}
+
+.conteudo-principal {
+  min-width: 0;
+  padding: 32px 40px 64px;
+}
+
+.cabecalho-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.cabecalho-pagina__titulo {
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cabecalho-pagina__subtitulo {
+  font-family: var(--fonte-corpo);
+  color: var(--cor-texto-secundario);
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.cabecalho-pagina__acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   5. SIDEBAR (NAVBAR LATERAL)
+   -------------------------------------------------------------------------- */
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cor-fundo-elevado);
+  border-right: 1px solid var(--cor-borda);
+  padding: 24px 16px;
+  z-index: 40;
+}
+
+.sidebar__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 28px;
+  text-decoration: none;
+  color: var(--cor-texto);
+}
+
+.sidebar__marca-icone {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--raio-sm);
+  background: linear-gradient(155deg, var(--cor-primaria), var(--cor-primaria-forte));
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sidebar__marca-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.sidebar__marca-nome {
+  font-family: var(--fonte-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sidebar__marca-tagline {
+  font-size: 0.7rem;
+  color: var(--cor-texto-terciario);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--raio-sm);
+  text-decoration: none;
+  color: var(--cor-texto-secundario);
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+  position: relative;
+}
+
+.sidebar__link svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+.sidebar__link:hover {
+  background-color: var(--cor-superficie-alt);
+  color: var(--cor-texto);
+}
+
+.sidebar__link:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.sidebar__link[aria-current="page"] {
+  background-color: var(--cor-primaria-suave);
+  color: var(--cor-primaria-forte);
+  font-weight: 600;
+}
+
+[data-tema="escuro"] .sidebar__link[aria-current="page"] {
+  color: var(--cor-primaria);
+}
+
+.sidebar__link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: var(--raio-full);
+  background-color: var(--cor-primaria);
+}
+
+.sidebar__rodape {
+  border-top: 1px solid var(--cor-borda);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Botão de alternância de tema (switch customizado) */
+.alterna-tema {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-superficie-alt);
+  border: none;
+  cursor: pointer;
+  color: var(--cor-texto);
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: 100%;
+}
+
+.alterna-tema:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.alterna-tema__rotulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alterna-tema__trilho {
+  --largura-trilho: 34px;
+  width: var(--largura-trilho);
+  height: 20px;
+  border-radius: var(--raio-full);
+  background-color: var(--cor-borda-forte);
+  position: relative;
+  transition: background-color var(--transicao-base);
+  flex-shrink: 0;
+}
+
+.alterna-tema__bolinha {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: var(--sombra-sm);
+  transition: transform var(--transicao-base);
+}
+
+/* Estado "escuro" é controlado via atributo no trilho (data-ativo="true") */
+.alterna-tema__trilho[data-ativo="true"] {
+  background-color: var(--cor-primaria);
+}
+
+.alterna-tema__trilho[data-ativo="true"] .alterna-tema__bolinha {
+  transform: translateX(14px);
+}
+
+/* Botão de menu mobile (hambúrguer) e a barrinha que o contém — escondidos em telas largas.
+   Usamos ".btn.sidebar__botao-fechar" (2 classes) em vez de só ".sidebar__botao-fechar" (1 classe)
+   porque a regra ".btn" lá embaixo também vale "display" — com a mesma especificidade, quem vier
+   depois no arquivo vence, e ".btn" vinha depois. Duas classes juntas garantem que este "none" ganhe. */
+.btn.sidebar__botao-fechar,
+.btn.botao-menu-mobile,
+.topbar-mobile {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. BOTÕES
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--raio-sm);
+  border: 1px solid transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transicao-rapida), border-color var(--transicao-rapida),
+    color var(--transicao-rapida), transform var(--transicao-rapida), box-shadow var(--transicao-rapida);
+  text-decoration: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primario {
+  background-color: var(--cor-primaria);
+  color: #fff;
+  box-shadow: var(--sombra-sm);
+}
+
+.btn--primario:hover:not(:disabled) {
+  background-color: var(--cor-primaria-forte);
+  box-shadow: var(--sombra-md);
+}
+
+.btn--accent {
+  background-color: var(--cor-accent);
+  color: #fff;
+}
+
+.btn--accent:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.btn--secundario {
+  background-color: var(--cor-superficie);
+  border-color: var(--cor-borda-forte);
+  color: var(--cor-texto);
+}
+
+.btn--secundario:hover:not(:disabled) {
+  background-color: var(--cor-superficie-alt);
+  border-color: var(--cor-texto-terciario);
+}
+
+.btn--perigo {
+  background-color: transparent;
+  border-color: var(--cor-perigo);
+  color: var(--cor-perigo);
+}
+
+.btn--perigo:hover:not(:disabled) {
+  background-color: var(--cor-perigo-suave);
+}
+
+.btn--fantasma {
+  background-color: transparent;
+  color: var(--cor-texto-secundario);
+}
+
+.btn--fantasma:hover:not(:disabled) {
+  background-color: var(--cor-superficie-alt);
+  color: var(--cor-texto);
+}
+
+.btn--icone {
+  padding: 9px;
+  border-radius: var(--raio-sm);
+}
+
+.btn--pequeno {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+}
+
+.btn--bloco {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   7. CARDS / SUPERFÍCIES
+   -------------------------------------------------------------------------- */
+.cartao {
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-sm);
+  transition: box-shadow var(--transicao-base), transform var(--transicao-base);
+}
+
+.cartao--interativo:hover {
+  box-shadow: var(--sombra-md);
+  transform: translateY(-2px);
+}
+
+.cartao__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 0;
+}
+
+.cartao__titulo {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.cartao__corpo {
+  padding: 18px 22px 22px;
+}
+
+/* --------------------------------------------------------------------------
+   8. BADGE DE STATUS + MEDIDOR DE NÍVEL (elemento de assinatura visual)
+   -------------------------------------------------------------------------- */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 8px;
+  border-radius: var(--raio-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-status__emoji {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* O medidor representa visualmente "nível de estoque", como um silo: 3 barras
+   que enchem de acordo com o status — reforça a identidade do produto. */
+.medidor-nivel {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+}
+
+.medidor-nivel__barra {
+  width: 3px;
+  border-radius: 1px;
+  background-color: currentColor;
+  opacity: 0.25;
+}
+
+.medidor-nivel__barra:nth-child(1) { height: 40%; }
+.medidor-nivel__barra:nth-child(2) { height: 70%; }
+.medidor-nivel__barra:nth-child(3) { height: 100%; }
+
+.medidor-nivel--nivel-1 .medidor-nivel__barra:nth-child(1) { opacity: 1; }
+.medidor-nivel--nivel-2 .medidor-nivel__barra:nth-child(-n+2) { opacity: 1; }
+.medidor-nivel--nivel-3 .medidor-nivel__barra { opacity: 1; }
+
+.badge-status--disponivel {
+  background-color: var(--cor-sucesso-suave);
+  color: var(--cor-sucesso);
+}
+
+.badge-status--baixo {
+  background-color: var(--cor-aviso-suave);
+  color: var(--cor-aviso);
+}
+
+.badge-status--indisponivel {
+  background-color: var(--cor-perigo-suave);
+  color: var(--cor-perigo);
+}
+
+/* Badges de status de pedido (sem medidor, cores próprias) */
+.badge-pedido {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--raio-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-pedido--pendente {
+  background-color: var(--cor-info-suave);
+  color: var(--cor-info);
+}
+
+.badge-pedido--concluido {
+  background-color: var(--cor-sucesso-suave);
+  color: var(--cor-sucesso);
+}
+
+.badge-pedido--cancelado {
+  background-color: var(--cor-perigo-suave);
+  color: var(--cor-perigo);
+}
+
+/* --------------------------------------------------------------------------
+   9. FORMULÁRIOS (sobrescrita do visual padrão do Bootstrap)
+   -------------------------------------------------------------------------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.campo__rotulo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+.campo__rotulo .obrigatorio {
+  color: var(--cor-perigo);
+  margin-left: 2px;
+}
+
+.campo__ajuda {
+  font-size: 0.76rem;
+  color: var(--cor-texto-terciario);
+}
+
+.campo__erro {
+  font-size: 0.78rem;
+  color: var(--cor-perigo);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.form-control,
+.form-select,
+textarea.form-control {
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-forte);
+  color: var(--cor-texto);
+  border-radius: var(--raio-sm);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-family: var(--fonte-corpo);
+  transition: border-color var(--transicao-rapida), box-shadow var(--transicao-rapida);
+  width: 100%;
+}
+
+.form-control::placeholder {
+  color: var(--cor-texto-terciario);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px var(--cor-primaria-suave);
+  outline: none;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: var(--cor-superficie-alt);
+  color: var(--cor-texto-terciario);
+  cursor: not-allowed;
+}
+
+.form-control.campo-invalido {
+  border-color: var(--cor-perigo);
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6B61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  appearance: none;
+  padding-right: 36px;
+}
+
+.campo-grupo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   10. TABELAS
+   -------------------------------------------------------------------------- */
+.tabela-wrapper {
+  overflow-x: auto;
+  border-radius: var(--raio-md);
+  border: 1px solid var(--cor-borda);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.tabela thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cor-texto-terciario);
+  font-weight: 600;
+  padding: 14px 18px;
+  background-color: var(--cor-superficie-alt);
+  border-bottom: 1px solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+}
+
+.tabela tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabela tbody tr {
+  transition: background-color var(--transicao-rapida);
+}
+
+.tabela tbody tr:hover {
+  background-color: var(--cor-superficie-alt);
+}
+
+.tabela__acoes {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.tabela__celula-principal {
+  font-weight: 600;
+}
+
+.tabela__celula-secundaria {
+  color: var(--cor-texto-terciario);
+  font-size: 0.78rem;
+}
+
+/* --------------------------------------------------------------------------
+   11. ESTADOS: CARREGAMENTO, VAZIO, INFO-BANNER
+   -------------------------------------------------------------------------- */
+.skeleton {
+  background: linear-gradient(90deg, var(--cor-superficie-alt) 25%, var(--cor-borda) 37%, var(--cor-superficie-alt) 63%);
+  background-size: 400% 100%;
+  animation: brilho-skeleton 1.4s ease infinite;
+  border-radius: var(--raio-sm);
+}
+
+@keyframes brilho-skeleton {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.skeleton-linha {
+  height: 16px;
+  margin: 6px 0;
+}
+
+.estado-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 56px 24px;
+  color: var(--cor-texto-secundario);
+}
+
+.estado-vazio svg {
+  width: 40px;
+  height: 40px;
+  color: var(--cor-texto-terciario);
+  margin-bottom: 6px;
+}
+
+.estado-vazio__titulo {
+  font-weight: 600;
+  color: var(--cor-texto);
+  font-size: 0.95rem;
+}
+
+.estado-vazio__descricao {
+  font-size: 0.85rem;
+  max-width: 320px;
+}
+
+.info-banner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  background-color: var(--cor-info-suave);
+  color: var(--cor-info);
+  border-radius: var(--raio-sm);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.info-banner svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.info-banner strong {
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   12. MODAIS (sobrescrita do Bootstrap Modal)
+   -------------------------------------------------------------------------- */
+.modal-content {
+  background-color: var(--cor-fundo-elevado);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-lg);
+  color: var(--cor-texto);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--cor-borda);
+  padding: 22px 26px;
+}
+
+.modal-title {
+  font-family: var(--fonte-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.modal-body {
+  padding: 22px 26px;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--cor-borda);
+  padding: 18px 26px;
+}
+
+.btn-close {
+  filter: var(--filtro-fechar, none);
+}
+
+[data-tema="escuro"] .btn-close {
+  filter: invert(1) grayscale(100%);
+}
+
+/* --------------------------------------------------------------------------
+   13. SWEETALERT2 — harmonizando com o tema do produto
+   -------------------------------------------------------------------------- */
+.swal2-popup.popup-silo {
+  border-radius: var(--raio-lg) !important;
+  background-color: var(--cor-fundo-elevado) !important;
+  color: var(--cor-texto) !important;
+  font-family: var(--fonte-corpo) !important;
+}
+
+.swal2-popup.popup-silo .swal2-title {
+  font-family: var(--fonte-display) !important;
+}
+
+.swal2-popup.popup-silo .swal2-confirm {
+  background-color: var(--cor-primaria) !important;
+  border-radius: var(--raio-sm) !important;
+  box-shadow: none !important;
+}
+
+.swal2-popup.popup-silo .swal2-cancel {
+  background-color: var(--cor-superficie-alt) !important;
+  color: var(--cor-texto) !important;
+  border-radius: var(--raio-sm) !important;
+  box-shadow: none !important;
+}
+
+.swal2-popup.popup-silo .swal2-deny {
+  background-color: var(--cor-perigo) !important;
+  border-radius: var(--raio-sm) !important;
+}
+
+/* --------------------------------------------------------------------------
+   14. UTILITÁRIOS
+   -------------------------------------------------------------------------- */
+.somente-leitor-tela {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.link-pular-conteudo {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  background-color: var(--cor-primaria);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--raio-sm);
+  z-index: 100;
+}
+
+.link-pular-conteudo:focus {
+  left: 16px;
+  top: 16px;
+}
+
+.indicador-tempo-real {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.76rem;
+  color: var(--cor-texto-secundario);
+}
+
+.indicador-tempo-real__ponto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--cor-sucesso);
+  box-shadow: 0 0 0 0 rgba(31, 157, 108, 0.6);
+  animation: pulso-tempo-real 2s infinite;
+}
+
+@keyframes pulso-tempo-real {
+  0% { box-shadow: 0 0 0 0 rgba(31, 157, 108, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(31, 157, 108, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 157, 108, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   15. RESPONSIVIDADE — MOBILE FIRST (a partir da estrutura desktop acima)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .campo-grupo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    transform: translateX(-100%);
+    transition: transform var(--transicao-base);
+    box-shadow: var(--sombra-lg);
+  }
+
+  .sidebar.sidebar--aberta {
+    transform: translateX(0);
+  }
+
+  .btn.sidebar__botao-fechar {
+    display: inline-flex;
+    align-self: flex-end;
+    margin-bottom: 8px;
+  }
+
+  /* Barrinha fixa no topo, no lugar de um botão flutuando sozinho: dá contexto
+     de marca (logo "Silo") ao hambúrguer e ancora ele visualmente à página. */
+  .topbar-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: -8px -20px 16px;
+    padding: 12px 20px;
+    background-color: var(--cor-fundo-elevado);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .topbar-mobile__marca {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--fonte-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--cor-texto);
+  }
+
+  .topbar-mobile__marca svg {
+    width: 18px;
+    height: 18px;
+    color: var(--cor-primaria);
+  }
+
+  .btn.botao-menu-mobile {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .sobreposicao-sidebar {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(10, 14, 12, 0.45);
+    z-index: 35;
+  }
+
+  .sobreposicao-sidebar.ativa {
+    display: block;
+  }
+
+  .conteudo-principal {
+    padding: 8px 20px 48px;
+  }
+
+  .cabecalho-pagina {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .conteudo-principal {
+    padding: 8px 14px 40px;
+  }
+
+  .cabecalho-pagina__titulo {
+    font-size: 1.5rem;
+  }
+
+  .tabela {
+    min-width: 560px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   16. TRANSIÇÃO SUAVE ENTRE PÁGINAS (View Transitions API)
+   Navegador nativo faz um "print" da página antiga e da nova e anima a troca
+   entre elas — sem precisar de JavaScript. Funciona em navegadores baseados
+   em Chromium (Chrome, Edge); em outros, a navegação continua normal, sem quebrar nada.
+   -------------------------------------------------------------------------- */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: silo-pagina-sai var(--transicao-base) forwards;
+}
+
+::view-transition-new(root) {
+  animation: silo-pagina-entra var(--transicao-base) forwards;
+}
+
+@keyframes silo-pagina-sai {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes silo-pagina-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}

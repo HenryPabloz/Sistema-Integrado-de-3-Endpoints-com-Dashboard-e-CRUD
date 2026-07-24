@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F4F6F3" />
+  <script>
+    // Aplica o tema salvo ANTES da página pintar na tela, pra não dar aquele clarão
+    // branco de meio segundo ao trocar de página com o tema escuro ativado.
+    (function () {
+      var temaSalvo = localStorage.getItem('temaSilo');
+      if (temaSalvo === 'escuro') {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      } else if (!temaSalvo && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-tema', 'escuro');
+      }
+    })();
+  </script>
+  <title>Pedidos · Silo</title>
+  <meta name="description" content="Cadastro e acompanhamento de pedidos, com baixa automática no estoque e recálculo de total." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+
+  <link href="../CSS/layout.css" rel="stylesheet" />
+  <link href="../CSS/pedidos.css" rel="stylesheet" />
+</head>
+<body>
+  <a href="#conteudo-principal" class="link-pular-conteudo">Pular para o conteúdo</a>
+
+  <div class="app">
+    <div class="sobreposicao-sidebar" id="sobreposicaoSidebar" data-acao="fechar-sidebar"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <button type="button" class="btn btn--icone btn--fantasma sidebar__botao-fechar" id="botaoFecharSidebar" aria-label="Fechar menu de navegação">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+
+      <a href="dashboard-estoque.html" class="sidebar__marca">
+        <span class="sidebar__marca-icone"><i data-lucide="warehouse" aria-hidden="true"></i></span>
+        <span class="sidebar__marca-texto">
+          <span class="sidebar__marca-nome">Silo</span>
+          <span class="sidebar__marca-tagline">Operações</span>
+        </span>
+      </a>
+
+      <nav class="sidebar__nav" aria-label="Navegação principal">
+        <a href="dashboard-estoque.html" class="sidebar__link">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+          <span>Dashboard &amp; Estoque</span>
+        </a>
+        <a href="produtos.html" class="sidebar__link">
+          <i data-lucide="package" aria-hidden="true"></i>
+          <span>Produtos</span>
+        </a>
+        <a href="pedidos.html" class="sidebar__link" aria-current="page">
+          <i data-lucide="shopping-cart" aria-hidden="true"></i>
+          <span>Pedidos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__rodape">
+        <button type="button" class="alterna-tema" id="botaoAlternarTema" aria-pressed="false">
+          <span class="alterna-tema__rotulo">
+            <i data-lucide="sun-moon" aria-hidden="true"></i>
+            Tema escuro
+          </span>
+          <span class="alterna-tema__trilho" id="trilhoAlternarTema" data-ativo="false">
+            <span class="alterna-tema__bolinha"></span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal" id="conteudo-principal">
+      <div class="topbar-mobile">
+        <button type="button" class="btn btn--icone btn--secundario botao-menu-mobile" id="botaoAbrirSidebar" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+        <span class="topbar-mobile__marca"><i data-lucide="warehouse" aria-hidden="true"></i>Silo</span>
+      </div>
+
+      <header class="cabecalho-pagina">
+        <div>
+          <h1 class="cabecalho-pagina__titulo">Pedidos</h1>
+          <p class="cabecalho-pagina__subtitulo">Cada pedido concluído gera baixa automática no estoque</p>
+        </div>
+        <div class="cabecalho-pagina__acoes">
+          <button type="button" class="btn btn--primario" id="botaoNovoPedido" data-bs-toggle="modal" data-bs-target="#modalPedido">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            Novo pedido
+          </button>
+        </div>
+      </header>
+
+      <!-- ====================== FILTROS ====================== -->
+      <div class="painel-filtros cartao">
+        <div class="campo">
+          <label class="campo__rotulo" for="filtroDataPedido">Data do pedido</label>
+          <input type="date" class="form-control" id="filtroDataPedido" name="filtroDataPedido" />
+        </div>
+
+        <div class="campo">
+          <label class="campo__rotulo" for="filtroProdutoPedido">Produto</label>
+          <select class="form-select" id="filtroProdutoPedido" name="filtroProdutoPedido">
+            <option value="todos">Todos os produtos</option>
+            <!-- Opções preenchidas dinamicamente pelo JS, destacando o produto mais pedido -->
+          </select>
+        </div>
+
+        <div class="campo">
+          <label class="campo__rotulo" for="filtroStatusPedido">Status</label>
+          <select class="form-select" id="filtroStatusPedido" name="filtroStatusPedido">
+            <option value="todos">Todos os status</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Concluído">Concluído</option>
+            <option value="Cancelado - sem estoque">Cancelado - sem estoque</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn btn--fantasma" id="botaoLimparFiltrosPedido">
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          Limpar filtros
+        </button>
+      </div>
+
+      <!-- ====================== LISTAGEM ====================== -->
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabelaPedidos">
+          <caption class="somente-leitor-tela">Lista de pedidos registrados</caption>
+          <thead>
+            <tr>
+              <th scope="col">Cliente</th>
+              <th scope="col">Data</th>
+              <th scope="col">Itens</th>
+              <th scope="col">Total</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="somente-leitor-tela">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabelaPedidos">
+            <!-- Linhas inseridas dinamicamente pelo JS (JS/pedidos.js) -->
+          </tbody>
+        </table>
+
+        <div class="skeleton-tabela" id="skeletonPedidos">
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+          <div class="skeleton skeleton-linha" style="width: 100%;"></div>
+        </div>
+
+        <div class="estado-vazio" id="estadoVazioPedidos" hidden>
+          <i data-lucide="clipboard-x" aria-hidden="true"></i>
+          <p class="estado-vazio__titulo">Nenhum pedido encontrado</p>
+          <p class="estado-vazio__descricao">Ajuste os filtros ou registre um novo pedido.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ====================== MODAL: PEDIDO ====================== -->
+  <div class="modal fade" id="modalPedido" tabindex="-1" aria-labelledby="modalPedidoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <form id="formPedido" novalidate>
+          <div class="modal-header">
+            <h3 class="modal-title" id="modalPedidoTitulo">Novo pedido</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="pedidoId" name="pedidoId" />
+
+            <div class="campo-grupo">
+              <div class="campo">
+                <label class="campo__rotulo" for="pedidoCliente">Cliente <span class="obrigatorio">*</span></label>
+                <input type="text" class="form-control" id="pedidoCliente" name="pedidoCliente" placeholder="Nome de quem fez o pedido…" autocomplete="off" required minlength="2" />
+                <span class="campo__erro" id="erroPedidoCliente" hidden></span>
+              </div>
+
+              <div class="campo">
+                <label class="campo__rotulo" for="pedidoData">Data e hora <span class="obrigatorio">*</span></label>
+                <input type="datetime-local" class="form-control" id="pedidoData" name="pedidoData" required />
+              </div>
+            </div>
+
+            <div class="campo">
+              <span class="campo__rotulo">Itens do pedido <span class="obrigatorio">*</span></span>
+
+              <div class="lista-itens-pedido" id="listaItensPedido" aria-live="polite">
+                <!-- Linhas de item clonadas de #templateItemPedido pelo JS -->
+              </div>
+
+              <span class="campo__erro" id="erroItensPedido" hidden></span>
+
+              <button type="button" class="btn btn--secundario btn--pequeno botao-adicionar-item" id="botaoAdicionarItemPedido">
+                <i data-lucide="plus" aria-hidden="true"></i>
+                Adicionar item
+              </button>
+            </div>
+
+            <div class="resumo-pedido">
+              <div class="resumo-pedido__linha">
+                <span>Total do pedido</span>
+                <strong class="dado-numerico" id="pedidoTotalPreview">R$ 0,00</strong>
+              </div>
+              <span class="campo__ajuda">Recalculado automaticamente a partir da quantidade × preço unitário de cada item.</span>
+            </div>
+
+            <div class="campo">
+              <label class="campo__rotulo" for="pedidoStatus">Status desejado <span class="obrigatorio">*</span></label>
+              <select class="form-select" id="pedidoStatus" name="pedidoStatus" required>
+                <option value="Pendente" selected>Pendente</option>
+                <option value="Concluído">Concluído (dá baixa no estoque)</option>
+              </select>
+              <span class="campo__ajuda">Se não houver estoque suficiente para concluir, o sistema ajusta o status automaticamente.</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secundario" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn--primario" id="botaoSalvarPedido">
+              <i data-lucide="check" aria-hidden="true"></i>
+              Salvar pedido
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template de uma linha de item — clonado via JS a cada "Adicionar item" -->
+  <template id="templateItemPedido">
+    <div class="linha-item-pedido">
+      <div class="linha-item-pedido__campo linha-item-pedido__campo--produto">
+        <label class="somente-leitor-tela">Produto</label>
+        <select class="form-select item-produto" required>
+          <option value="" selected disabled>Selecione o produto…</option>
+          <!-- Opções preenchidas dinamicamente pelo JS a partir do endpoint de Produtos -->
+        </select>
+      </div>
+      <div class="linha-item-pedido__campo linha-item-pedido__campo--quantidade">
+        <label class="somente-leitor-tela">Quantidade</label>
+        <input type="number" class="form-control item-quantidade" min="1" step="1" inputmode="numeric" placeholder="Qtd…" required />
+      </div>
+      <div class="linha-item-pedido__campo linha-item-pedido__campo--preco">
+        <label class="somente-leitor-tela">Preço unitário</label>
+        <input type="text" class="form-control item-preco-unitario dado-numerico" readonly tabindex="-1" placeholder="R$ 0,00" />
+      </div>
+      <div class="linha-item-pedido__campo linha-item-pedido__campo--subtotal">
+        <label class="somente-leitor-tela">Subtotal</label>
+        <span class="item-subtotal dado-numerico">R$ 0,00</span>
+      </div>
+      <button type="button" class="btn btn--icone btn--fantasma botao-remover-item" aria-label="Remover item">
+        <i data-lucide="trash-2" aria-hidden="true"></i>
+      </button>
+    </div>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="../JS/utils.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/navbar.js"></script>
+  <script src="../JS/pedidos.js"></script>
+</body>
+</html>

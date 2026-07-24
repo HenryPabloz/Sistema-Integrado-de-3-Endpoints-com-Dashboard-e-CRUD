@@ -1,0 +1,100 @@
+/* ==========================================================================
+   PRODUTOS.CSS — Estilos exclusivos da página de Produtos
+   (painel de filtros + listagem + preview de status derivado no modal)
+   ========================================================================== */
+
+.painel-filtros {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.campo--busca,
+.campo--preco {
+  margin-bottom: 0;
+}
+
+.painel-filtros .campo {
+  margin-bottom: 0;
+}
+
+.campo-busca__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.campo-busca__wrapper svg {
+  position: absolute;
+  left: 13px;
+  width: 16px;
+  height: 16px;
+  color: var(--cor-texto-terciario);
+  pointer-events: none;
+}
+
+.campo-busca__wrapper .form-control {
+  padding-left: 38px;
+}
+
+.campo-preco__wrapper {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 8px;
+}
+
+#botaoLimparFiltrosProduto {
+  height: 42px;
+}
+
+/* --------------------------------------------------------------------------
+   PREVIEW DE STATUS DERIVADO (modal de produto)
+   -------------------------------------------------------------------------- */
+.campo-status-derivado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--cor-superficie-alt);
+  border-radius: var(--raio-sm);
+  border: 1px dashed var(--cor-borda-forte);
+}
+
+.campo-status-derivado .campo__ajuda {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   CÉLULA DE PRODUTO NA TABELA (nome + categoria)
+   -------------------------------------------------------------------------- */
+.celula-produto__nome {
+  font-weight: 600;
+}
+
+.celula-produto__categoria {
+  font-size: 0.76rem;
+  color: var(--cor-texto-terciario);
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVIDADE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .painel-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .painel-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-preco__wrapper {
+    grid-template-columns: 1fr 1fr;
+  }
+}
